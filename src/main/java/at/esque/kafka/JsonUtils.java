@@ -333,6 +333,7 @@ public final class JsonUtils {
             treeItem.setExpanded(true);
             applyCorrectAdder(childNode, newItem);
         });
+        treeItem.setPropertyName(treeItem.getPropertyName() + " (" + i.get() + ")");
     }
 
     private static void recursivelyAddElements(TextNode val, JsonTreeItem treeItem) {
