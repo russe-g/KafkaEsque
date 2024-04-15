@@ -13,13 +13,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.google.common.base.Strings;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Struct;
 import com.google.protobuf.util.JsonFormat;
-import io.netty.util.internal.StringUtil;
 import javafx.scene.control.TreeItem;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
@@ -333,7 +331,7 @@ public final class JsonUtils {
             treeItem.setExpanded(true);
             applyCorrectAdder(childNode, newItem);
         });
-        treeItem.setPropertyName(treeItem.getPropertyName() + " (" + i.get() + ")");
+        treeItem.setPropertyName(treeItem.getPropertyName() + " (" + (i.get() + 1) + ")");
     }
 
     private static void recursivelyAddElements(TextNode val, JsonTreeItem treeItem) {
