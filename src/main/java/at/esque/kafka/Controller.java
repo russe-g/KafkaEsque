@@ -289,8 +289,17 @@ public class Controller {
         });
 
         clusterComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            adminClient = new KafkaesqueAdminClient(newValue.getBootStrapServers(), configHandler.getSslProperties(selectedCluster()), configHandler.getSaslProperties(selectedCluster()));
-            refreshTopicList();
+            try {
+                closeAdminClientIfPresentAndClearTopicList();
+                if (newValue == null) {
+                    return;
+                }
+                adminClient = new KafkaesqueAdminClient(newValue.getBootStrapServers(), configHandler.getSslProperties(selectedCluster()), configHandler.getSaslProperties(selectedCluster()));
+                refreshTopicList();
+            } catch (Exception e) {
+                ErrorAlert.show(e, controlledStage);
+                clusterComboBox.getSelectionModel().clearSelection();
+            }
         });
 
         partitionCombobox.getItems().add(-1);
@@ -343,6 +352,14 @@ public class Controller {
                     .orElse(null);
             showTextInStageTitle(text);
         });
+    }
+
+    private void closeAdminClientIfPresentAndClearTopicList() {
+        if (adminClient != null) {
+            adminClient.close();
+            adminClient = null;
+            topicListView.getBaseList().clear();
+        }
     }
 
     private void showTextInStageTitle(String text) {
