@@ -52,7 +52,7 @@ dependencies {
     implementation 'org.controlsfx:controlsfx:11.1.1'
     implementation 'org.gradle:gradle-core:6.1.1'
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
-    implementation 'com.flipkart.zjsonpatch:zjsonpatch:0.4.12'
+    implementation 'com.flipkart.zjsonpatch:zjsonpatch:0.4.16'
     implementation 'tech.allegro.schema.json2avro:converter:0.2.15'
     implementation 'software.amazon.msk:aws-msk-iam-auth:1.1.9'
 

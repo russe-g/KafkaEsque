@@ -19,6 +19,7 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Struct;
 import com.google.protobuf.util.JsonFormat;
 import javafx.scene.control.TreeItem;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -205,12 +207,49 @@ public final class JsonUtils {
     }
 
     private static void addNode(JsonTreeItem childWithPath, JsonTreeItem childNode, JsonNode value) {
+        if (childWithPath.isArray() && NumberUtils.isCreatable(childNode.getPropertyName())) {
+            long indexToInsertAt = Long.parseLong(childNode.getPropertyName());
+            childWithPath.getChildren().forEach(sibling -> {
+                if (sibling instanceof JsonTreeItem) {
+                    final JsonTreeItem castSibling = (JsonTreeItem) sibling;
+                    try {
+                        long current = Long.parseLong(castSibling.getPropertyName());
+                        if (current >= indexToInsertAt) {
+                            logger.debug("reindexing: {}", castSibling);
+                            if (castSibling.getDisplayValueSuffix() == null) {
+                                castSibling.setDisplayValueSuffix(" was index " + current + " before");
+                            }
+                            castSibling.setPropertyName((current + 1) + "");
+                        }
+                    } catch (NumberFormatException e) {
+                        logger.warn("could not parse {} as long (path = {})", castSibling.getPropertyName(), ((JsonTreeItem) sibling).getPath());
+                    }
+                }
+
+            });
+        }
         childWithPath.getChildren().add(childNode);
         childNode.setPropertyChangedType("add");
-        childNode.setPropertyValue("added");
         applyCorrectAdder(value, childNode);
+        if (childWithPath.isArray()) {
+            childWithPath.getChildren().sort(Comparator.comparing(stringTreeItem -> {
+                if (stringTreeItem instanceof JsonTreeItem jsonTreeItem) {
+                    if (NumberUtils.isCreatable(jsonTreeItem.getPropertyName())) {
+                        return Long.parseLong(jsonTreeItem.getPropertyName());
+                    } else {
+                        return Long.MAX_VALUE;
+                    }
+                } else {
+                    return Long.MAX_VALUE;
+                }
+            }));
+        }
         applyChangeTypeAndPropagateToChilds(childNode, "add");
+        if (childWithPath.isArray()) {
+            putActualSizeInDisplayValueSuffix(childWithPath);
+        }
     }
+
 
     private static void applyChangeTypeAndPropagateToChilds(JsonTreeItem childNode, String changeType) {
         childNode.setPropertyChangedType(changeType);
@@ -236,8 +275,6 @@ public final class JsonUtils {
     }
 
     private static void removeNode(JsonTreeItem path, JsonNode jsonNode) {
-        path.setPropertyName(" -" + path.getPropertyName() + "-");
-        path.setPropertyValue("removed" + (path.getPropertyValue() == null ? "" : path.getPropertyValue()));
         applyChangeTypeAndPropagateToChilds(path, jsonNode.get("op").textValue());
         AtomicBoolean reindex = new AtomicBoolean(false);
         path.getParent().getChildren().forEach(sibling -> {
@@ -247,8 +284,8 @@ public final class JsonUtils {
                     try {
                         long l = Long.parseLong(castSibling.getPropertyName());
                         logger.info("reindexing");
-                        if (castSibling.getPropertyValue() == null) {
-                            castSibling.setPropertyValue(" was index " + l + " before");
+                        if (castSibling.getDisplayValueSuffix() == null) {
+                            castSibling.setDisplayValueSuffix(" was index " + l + " before");
                         }
                         castSibling.setPropertyName((--l) + "");
                     } catch (NumberFormatException e) {
@@ -260,6 +297,18 @@ public final class JsonUtils {
                 }
             }
         });
+        if (path.getParent() instanceof JsonTreeItem jsonTreeItemParent && (jsonTreeItemParent.isArray())) {
+            putActualSizeInDisplayValueSuffix(jsonTreeItemParent);
+        }
+    }
+
+    private static void putActualSizeInDisplayValueSuffix(JsonTreeItem jsonTreeItemParent) {
+        long actualElementCount = jsonTreeItemParent.getChildren()
+                .stream()
+                .filter(JsonTreeItem.class::isInstance)
+                .filter(stringTreeItem -> !"remove".equals(((JsonTreeItem) stringTreeItem).getPropertyChangedType()))
+                .count();
+        jsonTreeItemParent.setDisplayValueSuffix(" (" + actualElementCount + ")");
     }
 
     private static void replaceValue(JsonTreeItem path, JsonNode jsonNode) {
@@ -324,6 +373,7 @@ public final class JsonUtils {
     }
 
     private static void recursivelyAddElements(ArrayNode jsonNode, JsonTreeItem treeItem) {
+        treeItem.setArray(true);
         AtomicInteger i = new AtomicInteger(-1);
         jsonNode.elements().forEachRemaining(childNode -> {
             JsonTreeItem newItem = new JsonTreeItem(i.incrementAndGet() + "", null);
@@ -331,11 +381,11 @@ public final class JsonUtils {
             treeItem.setExpanded(true);
             applyCorrectAdder(childNode, newItem);
         });
-        treeItem.setPropertyName(treeItem.getPropertyName() + " (" + (i.get() + 1) + ")");
+        treeItem.setDisplayValueSuffix(" (" + (i.get() + 1) + ")");
     }
 
     private static void recursivelyAddElements(TextNode val, JsonTreeItem treeItem) {
-        treeItem.setPropertyName(treeItem.getValue());
+        treeItem.setPropertyName(treeItem.getPropertyName());
         treeItem.setPropertyValue(val.textValue());
     }
 

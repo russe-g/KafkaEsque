@@ -1,22 +1,29 @@
 package at.esque.kafka.controls;
 
+import javafx.collections.ListChangeListener;
 import javafx.scene.control.TreeItem;
 
 public class JsonTreeItem extends TreeItem<String> {
     private String propertyName;
     private String propertyValue;
     private String propertyChangedType;
+    private String displayValueSuffix;
+    private boolean array = false;
 
     public JsonTreeItem(String propertyName, String propertyValue) {
-        this(propertyName, propertyValue, null);
+        this(propertyName, propertyValue, null, null);
     }
 
-    public JsonTreeItem(String propertyName, String propertyValue, String propertyChangedType) {
+    public JsonTreeItem(String propertyName, String propertyValue, String propertyChangedType, String displayValueSuffix) {
         super();
         this.propertyName = propertyName;
         this.propertyValue = propertyValue;
         this.propertyChangedType = propertyChangedType;
-        updateValue();
+        this.displayValueSuffix = displayValueSuffix;
+        this.getChildren().addListener((ListChangeListener.Change<?> c) -> {
+            updateDisplayValue();
+        });
+        updateDisplayValue();
     }
 
     public String getPropertyName() {
@@ -25,7 +32,7 @@ public class JsonTreeItem extends TreeItem<String> {
 
     public void setPropertyName(String propertyName) {
         this.propertyName = propertyName;
-        updateValue();
+        updateDisplayValue();
     }
 
     public String getPropertyValue() {
@@ -34,7 +41,7 @@ public class JsonTreeItem extends TreeItem<String> {
 
     public void setPropertyValue(String propertyValue) {
         this.propertyValue = propertyValue;
-        updateValue();
+        updateDisplayValue();
     }
 
     public String getPropertyChangedType() {
@@ -45,7 +52,24 @@ public class JsonTreeItem extends TreeItem<String> {
         this.propertyChangedType = propertyChangedType;
     }
 
-    private void updateValue() {
+    public String getDisplayValueSuffix() {
+        return displayValueSuffix;
+    }
+
+    public void setDisplayValueSuffix(String displayValueSuffix) {
+        this.displayValueSuffix = displayValueSuffix;
+        updateDisplayValue();
+    }
+
+    public boolean isArray() {
+        return array;
+    }
+
+    public void setArray(boolean array) {
+        this.array = array;
+    }
+
+    private void updateDisplayValue() {
         if (propertyName == null && propertyValue == null) {
             this.setValue("<null>");
         } else if (propertyName != null && propertyValue == null) {
@@ -55,16 +79,20 @@ public class JsonTreeItem extends TreeItem<String> {
         } else {
             this.setValue(propertyName + ": " + propertyValue);
         }
+
+        if (displayValueSuffix != null) {
+            this.setValue(this.getValue() + " " + displayValueSuffix);
+        }
     }
 
-    public String getPath(){
+    public String getPath() {
         return getPath(this);
     }
 
-    private String getPath(JsonTreeItem jsonTreeItem){
-        if(jsonTreeItem.getParent() == null){
+    private String getPath(JsonTreeItem jsonTreeItem) {
+        if (jsonTreeItem.getParent() == null) {
             return "";
         }
-        return getPath((JsonTreeItem) jsonTreeItem.getParent()) + "/"+jsonTreeItem.getPropertyName();
+        return getPath((JsonTreeItem) jsonTreeItem.getParent()) + "/" + jsonTreeItem.getPropertyName();
     }
 }
