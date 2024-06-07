@@ -591,7 +591,7 @@ public class Controller {
         } finally {
             stopWatch.stop();
             LOGGER.info("Finished getting topics for cluster [{}]", stopWatch);
-            backGroundTaskHolder.backgroundTaskStopped();
+            Platform.runLater(() -> backGroundTaskHolder.backgroundTaskStopped());
         }
     }
 
@@ -825,8 +825,10 @@ public class Controller {
             }
             try {
                 Map<Integer, AtomicLong> messagesConsumed = new HashMap<>();
-                Platform.runLater(() -> backGroundTaskHolder.setBackGroundTaskDescription("preparing consumer..."));
-                backGroundTaskHolder.setIsInProgress(true);
+                Platform.runLater(() -> {
+                    backGroundTaskHolder.setBackGroundTaskDescription("preparing consumer...");
+                    backGroundTaskHolder.setIsInProgress(true);
+                });
                 subscribeOrAssignToSelectedPartition(topic, consumerId);
                 Map<TopicPartition, Long> minOffsets = consumerHandler.getMinOffsets(consumerId);
                 Map<TopicPartition, Long> maxOffsets = consumerHandler.getMaxOffsets(consumerId);
@@ -853,7 +855,15 @@ public class Controller {
             return null;
         }
         ObservableList<KafkaMessage> baseList = ((MessagesTabContent) tab.getContent()).getMessageTableView().getBaseList();
-        baseList.clear();
+        Platform.runLater(baseList::clear);
+        while (!baseList.isEmpty()) {
+            LOGGER.info("Waiting for baseList to be cleared by FX thread");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return baseList;
     }
 
@@ -900,8 +910,11 @@ public class Controller {
             UUID consumerId = tempconsumerId;
             try {
                 Map<Integer, AtomicLong> messagesConsumed = new HashMap<>();
-                Platform.runLater(() -> backGroundTaskHolder.setBackGroundTaskDescription("preparing consumer..."));
-                backGroundTaskHolder.setIsInProgress(true);
+                Platform.runLater(() -> {
+                            backGroundTaskHolder.setBackGroundTaskDescription("preparing consumer...");
+                            backGroundTaskHolder.setIsInProgress(true);
+                        }
+                );
                 subscribeOrAssignToSelectedPartition(topic, consumerId);
                 Map<TopicPartition, Long> minOffsets = consumerHandler.getMinOffsets(consumerId);
                 Map<TopicPartition, Long> maxOffsets = consumerHandler.getMaxOffsets(consumerId);
@@ -963,7 +976,7 @@ public class Controller {
         runInDaemonThread(() -> {
             try {
                 AtomicLong messagesConsumed = new AtomicLong(0);
-                backGroundTaskHolder.setIsInProgress(true);
+                Platform.runLater(() -> backGroundTaskHolder.setIsInProgress(true));
                 subscribeOrAssignToSelectedPartition(topic, consumerId);
                 consumerHandler.seekToOffset(consumerId, -2);
                 PinTab tab = getActiveTabOrAddNew(topic, false);
@@ -995,7 +1008,7 @@ public class Controller {
                 return;
             }
             try {
-                backGroundTaskHolder.setIsInProgress(true);
+                Platform.runLater(() -> backGroundTaskHolder.setIsInProgress(true));
                 List<TopicPartition> topicPatitions;
                 if (fasttracePartition != null) {
                     topicPatitions = new ArrayList<>(Collections.singletonList(new TopicPartition(selectedTopic(), fasttracePartition)));
@@ -1135,8 +1148,11 @@ public class Controller {
             try {
                 Map<Integer, AtomicLong> messagesConsumed = new HashMap<>();
                 long specifiedOffset = Long.parseLong(specificOffsetTextField.getText());
-                Platform.runLater(() -> backGroundTaskHolder.setBackGroundTaskDescription("preparing consumer..."));
-                backGroundTaskHolder.setIsInProgress(true);
+                Platform.runLater(() -> {
+                            backGroundTaskHolder.setBackGroundTaskDescription("preparing consumer...");
+                            backGroundTaskHolder.setIsInProgress(true);
+                        }
+                );
                 subscribeOrAssignToSelectedPartition(topic, consumerId);
                 Map<TopicPartition, Long> minOffsets = consumerHandler.getMinOffsets(consumerId);
                 Map<TopicPartition, Long> maxOffsets = consumerHandler.getMaxOffsets(consumerId);
@@ -1172,8 +1188,11 @@ public class Controller {
             }
             try {
                 Map<Integer, AtomicLong> messagesConsumed = new HashMap<>();
-                Platform.runLater(() -> backGroundTaskHolder.setBackGroundTaskDescription("preparing consumer..."));
-                backGroundTaskHolder.setIsInProgress(true);
+                Platform.runLater(() -> {
+                            backGroundTaskHolder.setBackGroundTaskDescription("preparing consumer...");
+                            backGroundTaskHolder.setIsInProgress(true);
+                        }
+                );
                 subscribeOrAssignToSelectedPartition(topic, consumerId);
                 Map<TopicPartition, Long> minOffsets = consumerHandler.getMinOffsets(consumerId);
                 Map<TopicPartition, Long> maxOffsets = consumerHandler.getMaxOffsets(consumerId);
@@ -1332,6 +1351,9 @@ public class Controller {
         Thread daemonThread = new Thread(runnable);
         daemonThread.setDaemon(true);
         daemonThread.start();
+        daemonThread.setUncaughtExceptionHandler((t, e) -> {
+            Platform.runLater(() -> ErrorAlert.show(e, controlledStage));
+        });
     }
 
     // Experimental Area
