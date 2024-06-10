@@ -600,7 +600,7 @@ public class Controller {
         try {
             stopWatch.start();
             LOGGER.info("Started getting topics for cluster");
-            backGroundTaskHolder.setIsInProgress(true);
+            Platform.runLater(() -> backGroundTaskHolder.setIsInProgress(true));
             Set<String> topics = adminClient.getTopics();
             Platform.runLater(() -> topicListView.setItems(topics));
         } catch (Exception e) {
