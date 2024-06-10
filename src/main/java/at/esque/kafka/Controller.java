@@ -861,7 +861,7 @@ public class Controller {
                 });
             } finally {
                 consumerHandler.deregisterConsumer(consumerId);
-                backGroundTaskHolder.backgroundTaskStopped();
+                Platform.runLater(() -> backGroundTaskHolder.backgroundTaskStopped());
             }
 
         });
@@ -964,7 +964,7 @@ public class Controller {
                 });
             } finally {
                 consumerHandler.deregisterConsumer(consumerId);
-                backGroundTaskHolder.backgroundTaskStopped();
+                Platform.runLater(() -> backGroundTaskHolder.backgroundTaskStopped());
             }
         });
     }
@@ -1010,7 +1010,7 @@ public class Controller {
                 });
             } finally {
                 consumerHandler.deregisterConsumer(consumerId);
-                backGroundTaskHolder.backgroundTaskStopped();
+                Platform.runLater(() -> backGroundTaskHolder.backgroundTaskStopped());
             }
         });
     }
@@ -1078,7 +1078,7 @@ public class Controller {
                 });
             } finally {
                 consumerHandler.deregisterConsumer(consumerId);
-                backGroundTaskHolder.backgroundTaskStopped();
+                Platform.runLater(() -> backGroundTaskHolder.backgroundTaskStopped());
             }
         });
     }
@@ -1185,7 +1185,7 @@ public class Controller {
                 });
             } finally {
                 consumerHandler.deregisterConsumer(consumerId);
-                backGroundTaskHolder.backgroundTaskStopped();
+                Platform.runLater(() -> backGroundTaskHolder.backgroundTaskStopped());
             }
         });
     }
@@ -1225,7 +1225,7 @@ public class Controller {
                 });
             } finally {
                 consumerHandler.deregisterConsumer(consumerId);
-                backGroundTaskHolder.backgroundTaskStopped();
+                Platform.runLater(() -> backGroundTaskHolder.backgroundTaskStopped());
             }
         });
     }
@@ -1420,7 +1420,7 @@ public class Controller {
             }
             runInDaemonThread(() -> {
                 try {
-                    backGroundTaskHolder.setIsInProgress(true);
+                    Platform.runLater(() -> backGroundTaskHolder.setIsInProgress(true));
                     List<String> alreadyExistedTopics = new ArrayList<>();
                     List<String> createdTopics = new ArrayList<>();
 
@@ -1443,7 +1443,7 @@ public class Controller {
                     });
                     Platform.runLater(() -> TopicTemplateAppliedAlert.show(createdTopics, alreadyExistedTopics, topicListView.getScene().getWindow()));
                 } finally {
-                    backGroundTaskHolder.backgroundTaskStopped();
+                    Platform.runLater(() -> backGroundTaskHolder.backgroundTaskStopped());
                 }
             });
         }
@@ -1515,7 +1515,7 @@ public class Controller {
                     stopWatch.stop();
                     topicToProducerMap.values().forEach(uuid -> producerHandler.deregisterProducer(uuid));
                     LOGGER.info("Message Book completed [{}]", stopWatch);
-                    backGroundTaskHolder.backgroundTaskStopped();
+                    Platform.runLater(() -> backGroundTaskHolder.backgroundTaskStopped());
                 }
             });
         }
