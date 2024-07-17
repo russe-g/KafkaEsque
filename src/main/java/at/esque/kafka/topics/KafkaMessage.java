@@ -2,8 +2,11 @@ package at.esque.kafka.topics;
 
 import at.esque.kafka.serialization.jackson.HeaderObservableListConverter;
 import at.esque.kafka.serialization.jackson.MessageMetaDataObservableListConverter;
+import at.esque.kafka.topics.converters.IntegerPropertyConverter;
+import at.esque.kafka.topics.converters.StringPropertyConverter;
 import at.esque.kafka.topics.metadata.MessageMetaData;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.opencsv.bean.CsvCustomBindByName;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.LongProperty;
@@ -17,11 +20,14 @@ import javafx.collections.ObservableList;
 import org.apache.kafka.common.header.Header;
 
 public class KafkaMessage {
-
     private LongProperty offset = new SimpleLongProperty();
+    @CsvCustomBindByName(column = "partition", converter = IntegerPropertyConverter.class)
     private IntegerProperty partition = new SimpleIntegerProperty();
+    @CsvCustomBindByName(column = "key", converter = StringPropertyConverter.class)
     private StringProperty key = new SimpleStringProperty();
+    @CsvCustomBindByName(column = "value", converter = StringPropertyConverter.class)
     private StringProperty value = new SimpleStringProperty();
+    @CsvCustomBindByName(column = "timestamp", converter = StringPropertyConverter.class)
     private StringProperty timestamp = new SimpleStringProperty();
     @JsonDeserialize(converter = HeaderObservableListConverter.class)
     private ListProperty<Header> headers = new SimpleListProperty<>();
