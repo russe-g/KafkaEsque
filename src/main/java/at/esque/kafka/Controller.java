@@ -1528,7 +1528,7 @@ public class Controller {
         }));
     }
 
-    private void addMessagesToSend(List<KafkaMessageBookWrapper> messagesToSend, File playFile) {
+    void addMessagesToSend(List<KafkaMessageBookWrapper> messagesToSend, File playFile) {
         try {
             List<KafkaMessage> messages = new CsvToBeanBuilder<KafkaMessage>(new FileReader(playFile.getAbsolutePath()))
                     .withType(KafkaMessage.class)
