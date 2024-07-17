@@ -1,11 +1,11 @@
 package at.esque.kafka.topics;
 
-public class KafkaMessagBookWrapper {
+public class KafkaMessageBookWrapper {
 
     private String targetTopic;
     private KafkaMessage wrappedMessage;
 
-    public KafkaMessagBookWrapper(String targetTopic, KafkaMessage wrappedMessage) {
+    public KafkaMessageBookWrapper(String targetTopic, KafkaMessage wrappedMessage) {
         this.targetTopic = targetTopic;
         this.wrappedMessage = wrappedMessage;
     }
