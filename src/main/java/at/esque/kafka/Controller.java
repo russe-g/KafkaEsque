@@ -32,6 +32,7 @@ import at.esque.kafka.topics.DescribeTopicController;
 import at.esque.kafka.topics.DescribeTopicWrapper;
 import at.esque.kafka.topics.KafkaMessageBookWrapper;
 import at.esque.kafka.topics.KafkaMessage;
+import at.esque.kafka.topics.KafkaMessageForMessageBook;
 import at.esque.kafka.topics.metadata.MessageMetaData;
 import at.esque.kafka.topics.metadata.NumericMetadata;
 import at.esque.kafka.topics.metadata.StringMetadata;
@@ -1530,8 +1531,8 @@ public class Controller {
 
     private void addMessagesToSend(List<KafkaMessageBookWrapper> messagesToSend, File playFile) {
         try {
-            List<KafkaMessage> messages = new CsvToBeanBuilder<KafkaMessage>(new FileReader(playFile.getAbsolutePath()))
-                    .withType(KafkaMessage.class)
+            List<KafkaMessageForMessageBook> messages = new CsvToBeanBuilder<KafkaMessageForMessageBook>(new FileReader(playFile.getAbsolutePath()))
+                    .withType(KafkaMessageForMessageBook.class)
                     .build().parse();
             messagesToSend.addAll(messages.stream().map(message -> new KafkaMessageBookWrapper(playFile.getName(), message))
                     .toList());
