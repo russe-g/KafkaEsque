@@ -22,16 +22,16 @@ public class KafkaMessageForMessageBook {
         return key;
     }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     public String getKeyType() {
         return keyType;
     }
 
     public void setKeyType(String keyType) {
         this.keyType = keyType;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
     }
 
     public String getValue() {
