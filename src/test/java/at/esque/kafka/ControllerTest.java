@@ -1,9 +1,7 @@
 package at.esque.kafka;
 
 import at.esque.kafka.topics.KafkaMessageBookWrapper;
-import de.saxsys.javafx.test.JfxRunner;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
 
 
@@ -11,7 +9,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(JfxRunner.class)
 public class ControllerTest {
 
     @Test
