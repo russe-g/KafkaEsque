@@ -30,7 +30,6 @@ public class ControllerTest {
         message2Expected.setTimestamp("2022-11-06T17:13:52.919Z");
         message2Expected.setValue("{\"version\":0,\"newId\":\"${value2:UUID}\"}");
 
-
         // When
         Controller controller = new Controller();
         controller.addMessagesToSend(messagesToSend, playFile);
