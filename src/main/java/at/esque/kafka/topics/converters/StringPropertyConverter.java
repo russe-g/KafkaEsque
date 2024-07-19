@@ -14,6 +14,6 @@ public class StringPropertyConverter extends AbstractBeanField {
     @Override
     public String convertToWrite(Object value) {
         StringProperty prop = (StringProperty) value;
-        return String.format("%s", prop.get());
+        return prop.get();
     }
 }

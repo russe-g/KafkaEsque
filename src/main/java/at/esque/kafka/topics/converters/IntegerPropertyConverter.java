@@ -14,7 +14,7 @@ public class IntegerPropertyConverter extends AbstractBeanField {
     @Override
     public String convertToWrite(Object value) {
         IntegerProperty prop = (IntegerProperty) value;
-        return String.format("%d", prop.get());
+        return Integer.toString(prop.get());
     }
 
 }
