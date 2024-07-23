@@ -1,4 +1,4 @@
-package at.esque.kafka.topics;
+package at.esque.kafka.topics.model;
 
 
 public class KafkaMessageForMessageBook {

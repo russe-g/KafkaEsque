@@ -1,7 +1,7 @@
 package at.esque.kafka;
 
-import at.esque.kafka.topics.KafkaMessageBookWrapper;
-import at.esque.kafka.topics.KafkaMessageForMessageBook;
+import at.esque.kafka.topics.model.KafkaMessageBookWrapper;
+import at.esque.kafka.topics.model.KafkaMessageForMessageBook;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
